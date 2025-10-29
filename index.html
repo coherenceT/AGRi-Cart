@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agricart - Fresh Fruits Delivered</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #849D67;
+            --text-dark: #111;
+            --text-light: #666;
+            --bg-light: #f9fafb;
+            --border-color: #e5e7eb;
+            --white: #ffffff;
+            --accent-color: #ff9800;
+        }
+/* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Tier options */
+        .tier-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tier-option {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tier-option:hover {
+            border-color: #849D67;
+        }
+
+        .tier-option.selected {
+            border-color: #849D67;
+            background-color: rgba(132, 157, 103, 0.1);
+        }
+
+        .tier-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .tier-price {
+            color: #849D67;
+            font-weight: 700;
+        }
+
+        /* Tier quantity controls */
+        .tier-quantity-controls {
+            margin-top: 1rem;
+        }
+
+        .tier-quantity-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tier-quantity-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tier-quantity-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .tier-quantity-price {
+            color: #849D67;
+            font-size: 0.9rem;
+        }
+
+        .tier-quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid #849D67;
+            background: white;
+            color: #849D67;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .quantity-btn:hover {
+            background: #849D67;
+            color: white;
+        }
+
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 0.25rem;
+        }
+
+        /* Price display */
+        .price-display {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #2c3e50;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            animation: slideIn 0.3s, fadeOut 0.3s 2.7s forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Floating leaves */
+        #floating-leaves {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #849D67;
+            opacity: 0.2;
+            border-radius: 50% 0 50% 0;
+            animation: float linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: var(--white);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .leafy-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.2;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23849d67' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        /* Floating Leaves */
+        .floating-leaves {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23849D67' d='M17 8C8 10 5 9 5 9s-1 7 4 7 7-2 7-2 1 5-5 5-8-2-7-6c0 0 4-1 7-1s5 1 5 1z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.4;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+
+        /* Vine decorations */
+        .vine-decoration {
+            position: fixed;
+            z-index: 3;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .vine-1 {
+            top: 10%;
+            left: -5%;
+            width: 300px;
+            height: 400px;
+            transform: rotate(-10deg);
+        }
+
+        .vine-2 {
+            top: 15%;
+            right: -5%;
+            width: 250px;
+            height: 350px;
+            transform: rotate(15deg);
+        }
+
+        .vine-3 {
+            bottom: 10%;
+            left: -3%;
+            width: 280px;
+            height: 380px;
+            transform: rotate(5deg);
+        }
+
+        .vine-4 {
+            bottom: 5%;
+            right: -4%;
+            width: 320px;
+            height: 420px;
+            transform: rotate(-8deg);
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--white);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-leaf {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .cart-btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-btn:hover {
+            background-color: #6E8458;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 3rem 1rem;
+            position: relative;
+            z-index: 20;
+            background: linear-gradient(135deg, rgba(132, 157, 103, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .hero-image {
+            position: relative;
+            animation: fadeInRight 1s ease 0.4s both;
+        }
+
+        .hero-image img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            object-fit: cover;
+            height: 384px;
+        }
+
+        .floating-fruits {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .floating-fruit {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: floatFruit 8s infinite ease-in-out;
+        }
+
+        @keyframes floatFruit {
+            0%, 100% {
+            transform: translateY(0) rotate(0deg);
+            }
+            50% {
+            transform: translateY(-20px) rotate(10deg);
+            }
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .btn-primary:hover {
+            background-color: #6E8458;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Featured Section */
+        .featured {
+            padding: 4rem 1rem;
+            position: relative;
+            z-index: 20;
+        }
+
+        .featured-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .featured-header h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease;
+        }
+
+        .leaf-accent {
+            display: inline-block;
+            color: var(--primary-color);
+            margin: 0 0.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        /* Enhanced floating leaves - more, varied and cooler visuals */
+        /* Purpose: this augments the existing .leaf visuals created by JS */
+        .floating-leaves .leaf {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23849D67' d='M17 8C8 10 5 9 5 9s-1 7 4 7 7-2 7-2 1 5-5 5-8-2-7-6c0 0 4-1 7-1s5 1 5 1z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.45;
+            pointer-events: none;
+            z-index: 2;
+            transform-origin: center;
+            /* multiple animations for richer motion; JS inline styles (animationDelay / animationDuration) will layer with these */
+            animation: float 18s linear infinite, sway 6s ease-in-out infinite, spinLeaf 12s linear infinite;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.12));
+            mix-blend-mode: multiply;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* variety via nth-child selectors - creates distinct leaf sizes, opacities, and timings */
+        .floating-leaves .leaf:nth-child(3n) {
+            width: 42px;
+            height: 42px;
+            opacity: 0.55;
+            transform: rotate(-10deg);
+            animation-duration: 22s, 7s, 14s;
+        }
+
+        .floating-leaves .leaf:nth-child(4n) {
+            width: 22px;
+            height: 22px;
+            opacity: 0.35;
+            transform: rotate(8deg);
+            animation-duration: 14s, 5.5s, 10s;
+        }
+
+        .floating-leaves .leaf:nth-child(2n) {
+            width: 34px;
+            height: 34px;
+            opacity: 0.48;
+            animation-duration: 19s, 6s, 11s;
+        }
+
+        .floating-leaves .leaf:nth-child(5n) {
+            filter: drop-shadow(0 8px 14px rgba(0,0,0,0.18));
+            opacity: 0.65;
+            mix-blend-mode: screen;
+            transform: scale(1.08);
+            animation-duration: 26s, 6.5s, 16s;
+        }
+
+        /* subtle hover interaction if pointer-events are re-enabled elsewhere */
+        .floating-leaves .leaf:hover {
+            transform: scale(1.15) translateY(-6px);
+            opacity: 0.95;
+        }
+
+        /* small highlight on each leaf to give depth */
+        .floating-leaves .leaf::after {
+            content: '';
+            position: absolute;
+            top: 18%;
+            left: 18%;
+            width: 55%;
+            height: 55%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), rgba(255,255,255,0) 40%);
+            pointer-events: none;
+            mix-blend-mode: overlay;
+        }
+
+        /* New keyframes add sway and spin for natural motion */
+        @keyframes sway {
+            0% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8vh) rotate(-8deg); }
+            50% { transform: translateY(-15vh) rotate(6deg); }
+            75% { transform: translateY(-8vh) rotate(-3deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        @keyframes spinLeaf {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* preserve original float for vertical travel, but combine with others for richer motion */
+        @keyframes float {
+            0% {
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0.2;
+            }
+            10% {
+            opacity: 0.6;
+            }
+            70% {
+            opacity: 0.8;
+            }
+            100% {
+            transform: translateY(-120px) rotate(360deg);
+            opacity: 0.2;
+            }
+        }
+
+        /* optional decoration: occasional larger leaf that drifts slowly (target nth-child pattern) */
+        .floating-leaves .leaf.slow-giant {
+            width: 72px;
+            height: 72px;
+            opacity: 0.6;
+            animation-duration: 40s, 10s, 30s;
+            mix-blend-mode: multiply;
+        }
+
+        /* responsive tuning for mobile - reduce intensity */
+        @media (max-width: 600px) {
+            .floating-leaves .leaf {
+            opacity: 0.35;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.08));
+            animation: float 20s linear infinite, sway 7s ease-in-out infinite;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        .products-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(132, 157, 103, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .product-card:hover::before {
+            opacity: 1;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background-color: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .product-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6E8458;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background-color: var(--bg-light);
+            padding: 3rem 1rem;
+            text-align: center;
+            position: relative;
+            z-index: 20;
+        }
+
+        .cta-section h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-light);
+            padding: 2rem 1rem;
+            text-align: center;
+            position: relative;
+            z-index: 20;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .footer-contact {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quantity-btn {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .quantity-btn:hover {
+            background-color: var(--border-color);
+        }
+
+        .price-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .tier-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tier-option {
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tier-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .tier-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(132, 157, 103, 0.1);
+        }
+
+        .tier-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .tier-price {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 0.375rem;
+            z-index: 2000;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+
+            .hero-image img {
+                max-width: 100%;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .tier-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Seasonal Banner */
+        .seasonal-banner {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #6E8458 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+            z-index: 20;
+            animation: pulseBg 3s infinite;
+        }
+
+        @keyframes pulseBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(132, 157, 103, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background-color: var(--primary-color);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <!-- Background Elements -->
+    <div class="leafy-background"></div>
+    
+    <!-- Floating Leaves -->
+    <div class="floating-leaves" id="floating-leaves"></div>
+    
+    <!-- Vine Decorations -->
+    <div class="vine-decoration vine-1">
+        <svg viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50,50 C100,0 150,50 200,30 C250,10 280,80 250,150 C220,220 180,250 150,300 C120,350 100,380 50,350" stroke="#849D67" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M80,120 C120,100 160,120 190,110 C220,100 240,140 220,190 C200,240 170,260 150,300 C130,340 110,360 80,340" stroke="#849D67" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <circle cx="280" cy="120" r="12" fill="#849D67"/>
+            <circle cx="240" cy="280" r="10" fill="#849D67"/>
+            <circle cx="180" cy="350" r="8" fill="#849D67"/>
+        </svg>
+    </div>
+    
+    <div class="vine-decoration vine-2">
+        <svg viewBox="0 0 250 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M200,50 C150,0 100,50 50,30 C0,10 -20,80 10,150 C40,220 80,250 110,300 C140,350 160,380 210,350" stroke="#849D67" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M170,120 C130,100 90,120 60,110 C30,100 10,140 30,190 C50,240 80,260 100,300 C120,340 140,360 170,340" stroke="#849D67" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <circle cx="20" cy="120" r="12" fill="#849D67"/>
+            <circle cx="60" cy="280" r="10" fill="#849D67"/>
+            <circle cx="120" cy="350" r="8" fill="#849D67"/>
+        </svg>
+    </div>
+    
+    <div class="vine-decoration vine-3">
+        <svg viewBox="0 0 280 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M30,30 C80,-20 130,30 180,10 C230,-10 260,60 230,130 C200,200 160,230 130,280 C100,330 80,360 30,330" stroke="#849D67" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M60,100 C100,80 140,100 170,90 C200,80 220,120 200,170 C180,220 150,240 130,280 C110,320 90,340 60,320" stroke="#849D67" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <circle cx="260" cy="100" r="12" fill="#849D67"/>
+            <circle cx="220" cy="260" r="10" fill="#849D67"/>
+            <circle cx="160" cy="330" r="8" fill="#849D67"/>
+        </svg>
+    </div>
+    
+    <div class="vine-decoration vine-4">
+        <svg viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M270,50 C220,0 170,50 120,30 C70,10 40,80 70,150 C100,220 140,250 170,300 C200,350 220,380 270,350" stroke="#849D67" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M240,120 C200,100 160,120 130,110 C100,100 80,140 100,190 C120,240 150,260 170,300 C190,340 210,360 240,340" stroke="#849D67" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <circle cx="90" cy="120" r="12" fill="#849D67"/>
+            <circle cx="130" cy="280" r="10" fill="#849D67"/>
+            <circle cx="190" cy="350" r="8" fill="#849D67"/>
+        </svg>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Seasonal Banner -->
+        <div class="seasonal-banner">
+            <p>🍓 Summer Special: Get 15% off on all berries with code: SUMMER15</p>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <a href="#" class="logo">
+                    <span class="leaf-accent">🍃</span>
+                    Agricart
+                </a>
+                <button class="cart-btn" onclick="openCart()">
+                    🛒 Cart (<span id="cart-count">0</span>)
+                </button>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Fresh Fruits Delivered</h1>
+                    <p>Quality fruits at fair prices, from Good to Premium</p>
+                    <button class="btn-primary" onclick="scrollToProducts()">Order Now</button>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Fresh fruits spilling from basket">
+                    <div class="floating-fruits">
+                        <div class="floating-fruit" style="top: 10%; left: 10%; animation-delay: 0s;">🍎</div>
+                        <div class="floating-fruit" style="top: 20%; right: 15%; animation-delay: 1s;">🍌</div>
+                        <div class="floating-fruit" style="bottom: 30%; left: 5%; animation-delay: 2s;">🍊</div>
+                        <div class="floating-fruit" style="bottom: 10%; right: 10%; animation-delay: 3s;">🍇</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Fruits -->
+        <section class="featured">
+            <div class="featured-header">
+                <h2>
+                    <span class="leaf-accent">🍃</span>
+                    Featured Fruits
+                    <span class="leaf-accent">🍃</span>
+                </h2>
+            </div>
+            <div class="products-grid" id="products-grid">
+                <!-- Products will be inserted here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <h3>Browse Full Catalog</h3>
+            <p>Explore all 15 fresh fruits with multiple quality tiers</p>
+            <button class="btn-primary" onclick="scrollToProducts()">Shop Now</button>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="leaf-accent">🍃</div>
+                <div class="footer-contact">📞 Contact: +27 72 049 4067</div>
+                <p>🥗 We serve you with fresh fruits daily</p>
+                <p>Delivery hours: 8AM - 6PM | Pickup available</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Product Details</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-body">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Shopping Cart</h2>
+                <button class="close-btn" onclick="closeCart()">&times;</button>
+            </div>
+            <div id="cart-items">
+                <!-- Cart items will be inserted here -->
+            </div>
+            <div id="cart-total" style="font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0; color: #849D67;">
+                Total: R0.00
+            </div>
+            <button class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;" onclick="checkout()">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Checkout</h2>
+                <button class="close-btn" onclick="closeCheckout()">&times;</button>
+            </div>
+            <form onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="customer-phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Delivery Address</label>
+                    <input type="text" id="customer-address" required>
+                </div>
+                <div class="form-group">
+                    <label>Delivery Date</label>
+                    <input type="date" id="delivery-date" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;">
+                    Complete Order via WhatsApp
+                </button>
+            </form>
+        </div>
+    </div>
+
+   <script>
+        // Product Data
+        const products = [
+            { id: 1, name: 'Bananas', emoji: '🍌', tiers: { good: 45, better: 55, best: 65, premium: 85 } },
+            { id: 2, name: 'Apples', emoji: '🍎', tiers: { good: 60, better: 75, best: 90, premium: 120 } },
+            { id: 3, name: 'Oranges', emoji: '🍊', tiers: { good: 50, better: 65, best: 80, premium: 110 } },
+            { id: 4, name: 'Mangoes', emoji: '🥭', tiers: { good: 70, better: 90, best: 110, premium: 150 } },
+            { id: 5, name: 'Pears', emoji: '🍐', tiers: { good: 55, better: 70, best: 85, premium: 115 } },
+            { id: 6, name: 'Grapes', emoji: '🍇', tiers: { good: 65, better: 80, best: 100, premium: 140 } },
+            { id: 7, name: 'Pineapples', emoji: '🍍', tiers: { good: 80, better: 100, best: 120, premium: 160 } },
+            { id: 8, name: 'Avocados', emoji: '🥑', tiers: { good: 75, better: 95, best: 115, premium: 155 } },
+            { id: 9, name: 'Strawberries', emoji: '🍓', tiers: { good: 85, better: 105, best: 125, premium: 165 } },
+            { id: 10, name: 'Blueberries', emoji: '🫐', tiers: { good: 95, better: 115, best: 135, premium: 175 } },
+            { id: 11, name: 'Kiwis', emoji: '🥝', tiers: { good: 70, better: 85, best: 100, premium: 130 } },
+            { id: 12, name: 'Watermelons', emoji: '🍉', tiers: { good: 120, better: 150, best: 180, premium: 230 } },
+            { id: 13, name: 'Papayas', emoji: '🧡', tiers: { good: 60, better: 75, best: 90, premium: 120 } },
+            { id: 14, name: 'Lemons', emoji: '🍋', tiers: { good: 40, better: 50, best: 60, premium: 80 } },
+            { id: 15, name: 'Limes', emoji: '🍋', tiers: { good: 40, better: 50, best: 60, premium: 80 } }
+        ];
+
+        let cart = JSON.parse(localStorage.getItem('agricart-cart')) || [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 1500);
+
+            // Create floating leaves
+            createFloatingLeaves();
+
+            // Render products
+            renderProducts();
+
+            // Update cart count
+            updateCartCount();
+
+            // Add scroll progress indicator
+            window.addEventListener('scroll', updateProgressBar);
+        });
+
+        function createFloatingLeaves() {
+            const container = document.getElementById('floating-leaves');
+            const leafCount = 20;
+
+            for (let i = 0; i < leafCount; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf';
+                
+                // Random position and animation delay
+                const left = Math.random() * 100;
+                const animationDelay = Math.random() * 15;
+                const animationDuration = 15 + Math.random() * 10;
+                
+                leaf.style.left = `${left}%`;
+                leaf.style.animationDelay = `${animationDelay}s`;
+                leaf.style.animationDuration = `${animationDuration}s`;
+                
+                container.appendChild(leaf);
+            }
+        }
+
+        function updateProgressBar() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-image">${product.emoji}</div>
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-description">4 quality options available</div>
+                        <button class="btn-secondary" onclick="openProductModal(${product.id})">
+                            View options
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            const modal = document.getElementById('product-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            modalTitle.textContent = product.name;
+            modalBody.innerHTML = `
+                <div style="text-align: center; font-size: 4rem; margin-bottom: 1rem;">${product.emoji}</div>
+                <div class="tier-options">
+                    <div class="tier-option" onclick="selectTier(this, 'good', ${product.tiers.good})">
+                        <div class="tier-name">Good</div>
+                        <div class="tier-price">R${product.tiers.good}</div>
+                    </div>
+                    <div class="tier-option" onclick="selectTier(this, 'better', ${product.tiers.better})">
+                        <div class="tier-name">Better</div>
+                        <div class="tier-price">R${product.tiers.better}</div>
+                    </div>
+                    <div class="tier-option" onclick="selectTier(this, 'best', ${product.tiers.best})">
+                        <div class="tier-name">Best</div>
+                        <div class="tier-price">R${product.tiers.best}</div>
+                    </div>
+                    <div class="tier-option" onclick="selectTier(this, 'premium', ${product.tiers.premium})">
+                        <div class="tier-name">Premium</div>
+                        <div class="tier-price">R${product.tiers.premium}</div>
+                    </div>
+                </div>
+                <div class="tier-quantity-controls" id="tier-quantity-controls">
+                    <!-- Tier quantity controls will be added here -->
+                </div>
+                <div class="price-display" id="total-price">Total: R0.00</div>
+                <button class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;" onclick="addToCart(${productId})">
+                    Add to Cart
+                </button>
+            `;
+
+            modal.classList.add('active');
+            window.currentProduct = product;
+            window.selectedTiers = {};
+            window.selectedTier = null;
+            window.selectedPrice = 0;
+            
+            // Initialize tier quantity controls
+            updateTierQuantityControls();
+        }
+
+        function selectTier(element, tier, price) {
+            document.querySelectorAll('.tier-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            window.selectedTier = tier;
+            window.selectedPrice = price;
+            
+            // Initialize this tier in selectedTiers if not present
+            if (!window.selectedTiers[tier]) {
+                window.selectedTiers[tier] = 0;
+            }
+            
+            updateTierQuantityControls();
+            updateTotalPrice();
+        }
+
+        function updateTierQuantityControls() {
+            const container = document.getElementById('tier-quantity-controls');
+            const product = window.currentProduct;
+            
+            if (!product) return;
+            
+            let html = '';
+            
+            // Create quantity controls for each tier
+            Object.entries(product.tiers).forEach(([tier, price]) => {
+                const quantity = window.selectedTiers[tier] || 0;
+                const isSelected = window.selectedTier === tier;
+                
+                html += `
+                    <div class="tier-quantity-row" ${isSelected ? 'style="background-color: rgba(132, 157, 103, 0.05); border-radius: 8px; padding: 0.75rem;"' : ''}>
+                        <div class="tier-quantity-info">
+                            <div class="tier-quantity-name">${tier.charAt(0).toUpperCase() + tier.slice(1)}</div>
+                            <div class="tier-quantity-price">R${price} per item</div>
+                        </div>
+                        <div class="tier-quantity-selector">
+                            <button type="button" class="quantity-btn" onclick="decreaseTierQty('${tier}')">−</button>
+                            <input type="number" id="quantity-${tier}" value="${quantity}" min="0" class="quantity-input" onchange="updateTierQty('${tier}', this.value)">
+                            <button type="button" class="quantity-btn" onclick="increaseTierQty('${tier}')">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function increaseTierQty(tier) {
+            const input = document.getElementById(`quantity-${tier}`);
+            input.value = parseInt(input.value) + 1;
+            updateTierQty(tier, input.value);
+        }
+
+        function decreaseTierQty(tier) {
+            const input = document.getElementById(`quantity-${tier}`);
+            if (parseInt(input.value) > 0) {
+                input.value = parseInt(input.value) - 1;
+                updateTierQty(tier, input.value);
+            }
+        }
+
+        function updateTierQty(tier, value) {
+            window.selectedTiers[tier] = parseInt(value) || 0;
+            updateTotalPrice();
+        }
+
+        function updateTotalPrice() {
+            const product = window.currentProduct;
+            let total = 0;
+            
+            Object.entries(window.selectedTiers).forEach(([tier, quantity]) => {
+                if (quantity > 0 && product.tiers[tier]) {
+                    total += product.tiers[tier] * quantity;
+                }
+            });
+            
+            document.getElementById('total-price').textContent = `Total: R${total.toFixed(2)}`;
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            let hasItems = false;
+            
+            // Check if any tier has quantity > 0
+            Object.values(window.selectedTiers).forEach(quantity => {
+                if (quantity > 0) hasItems = true;
+            });
+            
+            if (!hasItems) {
+                alert('Please select at least one quality tier with quantity greater than 0');
+                return;
+            }
+
+            // Add each tier with quantity > 0 to cart
+            Object.entries(window.selectedTiers).forEach(([tier, quantity]) => {
+                if (quantity > 0) {
+                    cart.push({
+                        productName: product.name,
+                        tier: tier,
+                        price: product.tiers[tier],
+                        quantity: quantity,
+                        total: product.tiers[tier] * quantity
+                    });
+                }
+            });
+
+            localStorage.setItem('agricart-cart', JSON.stringify(cart));
+            updateCartCount();
+            closeModal();
+            showToast(`${product.name} added to cart!`);
+        }
+
+        function openCart() {
+            const modal = document.getElementById('cart-modal');
+            const cartItems = document.getElementById('cart-items');
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Your cart is empty</p>';
+            } else {
+                cartItems.innerHTML = cart.map((item, index) => `
+                    <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 600;">${item.productName} (${item.tier})</div>
+                            <div style="color: #666; font-size: 0.875rem;">R${item.price} × ${item.quantity}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; color: #849D67;">R${item.total.toFixed(2)}</div>
+                            <button onclick="removeFromCart(${index})" style="background: none; border: none; color: #d32f2f; cursor: pointer; text-decoration: underline;">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const total = cart.reduce((sum, item) => sum + item.total, 0);
+            document.getElementById('cart-total').textContent = `Total: R${total.toFixed(2)}`;
+            modal.classList.add('active');
+        }
+
+        function closeCart() {
+            document.getElementById('cart-modal').classList.remove('active');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('agricart-cart', JSON.stringify(cart));
+            updateCartCount();
+            openCart();
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+            closeCart();
+            document.getElementById('checkout-modal').classList.add('active');
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-modal').classList.remove('active');
+        }
+
+        function submitOrder(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('customer-name').value;
+            const phone = document.getElementById('customer-phone').value;
+            const address = document.getElementById('customer-address').value;
+            const date = document.getElementById('delivery-date').value;
+
+            const orderDetails = cart.map(item => 
+                `${item.productName} (${item.tier}) - R${item.price} × ${item.quantity} = R${item.total.toFixed(2)}`
+            ).join('\n');
+
+            const total = cart.reduce((sum, item) => sum + item.total, 0);
+
+            const message = `Hi Agricart! I'd like to place an order:\n\n${orderDetails}\n\n*Total: R${total.toFixed(2)}*\n\nCustomer Details:\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\nDelivery Date: ${date}`;
+
+            const whatsappUrl = `https://wa.me/27720494067?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+
+            cart = [];
+            localStorage.setItem('agricart-cart', JSON.stringify(cart));
+            updateCartCount();
+            closeCheckout();
+            showToast('Order sent to WhatsApp!');
+        }
+
+        function closeModal() {
+            document.getElementById('product-modal').classList.remove('active');
+        }
+
+        function updateCartCount() {
+            document.getElementById('cart-count').textContent = cart.length;
+        }
+
+        function scrollToProducts() {
+            document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const productModal = document.getElementById('product-modal');
+            const cartModal = document.getElementById('cart-modal');
+            const checkoutModal = document.getElementById('checkout-modal');
+
+            if (event.target === productModal) productModal.classList.remove('active');
+            if (event.target === cartModal) cartModal.classList.remove('active');
+            if (event.target === checkoutModal) checkoutModal.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
