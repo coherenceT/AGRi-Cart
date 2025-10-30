@@ -705,6 +705,20 @@
             font-size: 3rem;
             position: relative;
             z-index: 2;
+            overflow: hidden; /* Prevent image overflow */
+            border-top-left-radius: 0.5rem; /* Match card border radius */
+            border-top-right-radius: 0.5rem;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Make image cover container */
+            transition: transform 0.3s ease; /* Add hover effect */
+        }
+
+        .product-image img:hover {
+            transform: scale(1.1); /* Zoom effect on hover */
         }
 
         .product-info {
@@ -1234,21 +1248,21 @@
    <script>
         // Product Data
         const products = [
-            { id: 1, name: 'Bananas', emoji: '🍌', tiers: { good: 45, better: 55, best: 65, premium: 85 } },
-            { id: 2, name: 'Apples', emoji: '🍎', tiers: { good: 60, better: 75, best: 90, premium: 120 } },
-            { id: 3, name: 'Oranges', emoji: '🍊', tiers: { good: 50, better: 65, best: 80, premium: 110 } },
-            { id: 4, name: 'Mangoes', emoji: '🥭', tiers: { good: 70, better: 90, best: 110, premium: 150 } },
-            { id: 5, name: 'Pears', emoji: '🍐', tiers: { good: 55, better: 70, best: 85, premium: 115 } },
-            { id: 6, name: 'Grapes', emoji: '🍇', tiers: { good: 65, better: 80, best: 100, premium: 140 } },
-            { id: 7, name: 'Pineapples', emoji: '🍍', tiers: { good: 80, better: 100, best: 120, premium: 160 } },
-            { id: 8, name: 'Avocados', emoji: '🥑', tiers: { good: 75, better: 95, best: 115, premium: 155 } },
-            { id: 9, name: 'Strawberries', emoji: '🍓', tiers: { good: 85, better: 105, best: 125, premium: 165 } },
-            { id: 10, name: 'Blueberries', emoji: '🫐', tiers: { good: 95, better: 115, best: 135, premium: 175 } },
-            { id: 11, name: 'Kiwis', emoji: '🥝', tiers: { good: 70, better: 85, best: 100, premium: 130 } },
-            { id: 12, name: 'Watermelons', emoji: '🍉', tiers: { good: 120, better: 150, best: 180, premium: 230 } },
-            { id: 13, name: 'Papayas', emoji: '🧡', tiers: { good: 60, better: 75, best: 90, premium: 120 } },
-            { id: 14, name: 'Lemons', emoji: '🍋', tiers: { good: 40, better: 50, best: 60, premium: 80 } },
-            { id: 15, name: 'Limes', emoji: '🍋', tiers: { good: 40, better: 50, best: 60, premium: 80 } }
+            { id: 1, name: 'Bananas', emoji: '<img src="images/bananas.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 45, better: 55, best: 65, premium: 85 } },
+            { id: 2, name: 'Apples', emoji: '<img src="images/apples.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 60, better: 75, best: 90, premium: 120 } },
+            { id: 3, name: 'Oranges', emoji: '<img src="images/oranges.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 50, better: 65, best: 80, premium: 110 } },
+            { id: 4, name: 'Mangoes', emoji: '<img src="images/mangoes.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 70, better: 90, best: 110, premium: 150 } },
+            { id: 5, name: 'Pears', emoji: '<img src="images/pear.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 55, better: 70, best: 85, premium: 115 } },
+            { id: 6, name: 'Grapes', emoji: '<img src="images/grapes.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 65, better: 80, best: 100, premium: 140 } },
+            { id: 7, name: 'Pineapples', emoji: '<img src="images/pinaples.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 80, better: 100, best: 120, premium: 160 } },
+            { id: 8, name: 'Avocados', emoji: '<img src="images/avocados.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 75, better: 95, best: 115, premium: 155 } },
+            { id: 9, name: 'Strawberries', emoji: '<img src="images/strawberies.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 85, better: 105, best: 125, premium: 165 } },
+            { id: 10, name: 'Blueberries', emoji: '<img src="images/bleuberries.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 95, better: 115, best: 135, premium: 175 } },
+            { id: 11, name: 'Kiwis', emoji: '<img src="images/kiwi.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 70, better: 85, best: 100, premium: 130 } },
+            { id: 12, name: 'Watermelons', emoji: '<img src="images/watermelon.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 120, better: 150, best: 180, premium: 230 } },
+            { id: 13, name: 'Papayas', emoji: '<img src="images/papayas.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 60, better: 75, best: 90, premium: 120 } },
+            { id: 14, name: 'Lemons', emoji: '<img src="images/lemon.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 40, better: 50, best: 60, premium: 80 } },
+            { id: 15, name: 'Limes', emoji: '<img src="images/lime.jpg" style="width:100%; height:100%; object-fit:cover;">', tiers: { good: 40, better: 50, best: 60, premium: 80 } }
         ];
 
         let cart = JSON.parse(localStorage.getItem('agricart-cart')) || [];
