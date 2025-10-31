@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agricart - Account Login</title>
+    <title>Agricart - Customer Portal (15% Off)</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -67,42 +67,52 @@
                     <span style="margin-left:12px;">Agricart</span>
                 </a>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="guest.html" class="cart-btn" style="text-decoration: none; display: flex; align-items: center; background-color: #849D67; color: white;">
-                        Browse as Guest
-                    </a>
+                    <button class="cart-btn" onclick="openCart()">
+                        🛒 Cart (<span id="cart-count">0</span>)
+                    </button>
+                    <!-- Logout button will be inserted here by JS -->
                 </div>
             </div>
         </header>
 
-        <!-- MAIN CONTENT -->
+        <!-- MAIN CONTENT (Customer Interface) -->
         <div id="main-content">
-            <div class="login-container">
-                <h2>Account Login</h2>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" required>
-                    </div>
-                    <button type="submit" class="btn-primary">Login</button>
-                </form>
-                
-                <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd; text-align: center;">
-                    <h3>New User?</h3>
-                    <p style="margin-bottom: 1rem; color: var(--text-dark);">
-                        <a href="#" onclick="showCreateAccountModal(event)" style="color: var(--primary-color); font-weight: bold;">Create an account</a> to unlock exclusive discounts (15% for customers, 20% for businesses).
-                    </p>
-                </div>
-
-                <p style="margin-top: 1rem; color: var(--text-light); font-size: 0.8rem;">
-                    Test Accounts:
-                    <br>Business: business_user / password123
-                    <br>Customer: customer_user / password456
+            <div class="seasonal-banner">
+                <p id="seasonal-banner-text">
+                    <!-- Dynamic welcome message will be inserted here by JS -->
                 </p>
             </div>
+            <section class="hero">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>Fresh Fruits Delivered (Customer)</h1>
+                        <p>Quality fruits at fair prices, from Good to Premium</p>
+                        <button class="btn-primary" onclick="scrollToProducts()">Order Now</button>
+                    </div>
+                    <div class="hero-image">
+                        <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Fresh fruits spilling from basket">
+                    </div>
+                </div>
+            </section>
+
+            <section class="featured">
+                <div class="featured-header">
+                    <h2>
+                        <span class="leaf-accent">🍃</span>
+                        Featured Fruits
+                        <span class="leaf-accent">🍃</span>
+                    </h2>
+                </div>
+                <div class="products-grid" id="products-grid">
+                    <!-- Products will be inserted here by JavaScript -->
+                </div>
+            </section>
+            
+            <section class="cta-section">
+                <h3>Browse Full Catalog</h3>
+                <p>Explore all 15 fresh fruits with multiple quality tiers</p>
+                <button class="btn-primary" onclick="scrollToProducts()">Shop Now</button>
+            </section>
         </div>
 
         <!-- Footer -->
@@ -115,80 +125,70 @@
             </div>
         </footer>
     </div>
-    
-    <!-- Create Account Modal -->
-    <div id="create-account-modal" class="modal">
+
+    <!-- Modals -->
+    <div id="product-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Create Account</h2>
-                <button class="close-btn" onclick="closeCreateAccountModal()">&times;</button>
+                <h2 id="modal-title">Product Details</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
-            <form id="register-form">
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Shopping Cart</h2>
+                <button class="close-btn" onclick="closeCart()">&times;</button>
+            </div>
+            <div id="cart-items"></div>
+            <div id="cart-summary">
+                <div id="cart-subtotal" style="font-size: 1rem; font-weight: 500; margin-top: 1rem; color: #666;">Subtotal: R0.00</div>
+                <div id="cart-discount" style="font-size: 1rem; font-weight: 500; color: #d32f2f;">Discount: R0.00</div>
+                <div id="cart-total" style="font-size: 1.5rem; font-weight: 700; margin: 0.5rem 0; color: #849D67;">Total: R0.00</div>
+            </div>
+            <button class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;" onclick="checkout()">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Checkout</h2>
+                <button class="close-btn" onclick="closeCheckout()">&times;</button>
+            </div>
+            <form onsubmit="submitOrder(event)">
                 <div class="form-group">
-                    <label for="reg-username">Username</label>
-                    <input type="text" id="reg-username" required>
+                    <label>Full Name</label>
+                    <input type="text" id="customer-name" required>
                 </div>
                 <div class="form-group">
-                    <label for="reg-password">Password</label>
-                    <input type="password" id="reg-password" required>
+                    <label>Phone Number</label>
+                    <input type="tel" id="customer-phone" required>
                 </div>
                 <div class="form-group">
-                    <label for="reg-role">Account Type</label>
-                    <select id="reg-role" required>
-                        <option value="customer">Customer (15% Discount)</option>
-                        <option value="business">Business (20% Discount)</option>
-                    </select>
+                    <label>Delivery Address</label>
+                    <input type="text" id="customer-address" required>
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">Register</button>
+                <div class="form-group">
+                    <label>Preferred Delivery Date</label>
+                    <input type="date" id="delivery-date" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;">
+                    Place Order via WhatsApp
+                </button>
             </form>
         </div>
     </div>
 
     <script src="app.js"></script>
     <script>
-        // Check if user is already logged in and redirect
         document.addEventListener('DOMContentLoaded', () => {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (currentUser) {
-                if (currentUser.role === 'business') {
-                    window.location.href = 'business.html';
-                } else if (currentUser.role === 'customer') {
-                    window.location.href = 'customer.html';
-                }
-            }
-            
-            // Attach login handler to the form
-            document.getElementById('login-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                // Call the login function defined in app.js
-                await login(username, password);
-            });
-            
-            // Initialize common elements
-            createFloatingLeaves(); 
-            window.addEventListener('scroll', updateProgressBar);
-        });
-
-        function showCreateAccountModal(e) {
-            e.preventDefault();
-            document.getElementById('create-account-modal').classList.add('active');
-        }
-
-        function closeCreateAccountModal() {
-            document.getElementById('create-account-modal').classList.remove('active');
-        }
-        
-        // Attach registration handler
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('reg-username').value;
-            const password = document.getElementById('reg-password').value;
-            const role = document.getElementById('reg-role').value;
-            
-            await register(username, password, role);
+            initializePage('customer');
         });
     </script>
 </body>
