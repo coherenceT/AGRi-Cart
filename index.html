@@ -6,6 +6,20 @@
     <title>Agricart - Account Login</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        // Immediate redirect check (before page loads) for better UX
+        (function() {
+            const urlParamsCheck = new URLSearchParams(window.location.search);
+            const hasLoginParam = urlParamsCheck.get('login') === 'true';
+            const hasReferrer = document.referrer.includes('guest.html');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            // If no login intent and no logged in user, redirect immediately
+            if (!hasLoginParam && !hasReferrer && !currentUser) {
+                window.location.href = 'guest.html';
+            }
+        })();
+    </script>
 </head>
 <body>
 
@@ -159,17 +173,31 @@
 
     <script src="app.js"></script>
     <script>
-        // Check if user is already logged in and redirect
+        // Check if user came from guest.html (has a flag) or wants to login explicitly
+        const loginUrlParams = new URLSearchParams(window.location.search);
+        const allowLogin = loginUrlParams.get('login') === 'true' || document.referrer.includes('guest.html');
+        
         document.addEventListener('DOMContentLoaded', () => {
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            // If user is logged in, redirect to their portal
             if (currentUser) {
                 if (currentUser.role === 'business') {
                     window.location.href = 'business.html';
+                    return;
                 } else if (currentUser.role === 'customer') {
                     window.location.href = 'customer.html';
+                    return;
                 }
             }
             
+            // If not explicitly accessing login page, redirect to guest.html
+            if (!allowLogin) {
+                window.location.href = 'guest.html';
+                return;
+            }
+            
+            // User explicitly wants to login - show login form
             // Attach login handler to the form
             document.getElementById('login-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -259,3 +287,4 @@
     </script>
 </body>
 </html>
+

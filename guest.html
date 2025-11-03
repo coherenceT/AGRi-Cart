@@ -70,7 +70,7 @@
                     <button class="cart-btn" onclick="openCart()">
                         🛒 Cart (<span id="cart-count">0</span>)
                     </button>
-                    <a href="index.html" class="cart-btn" style="text-decoration: none; display: flex; align-items: center; background-color: #849D67; color: white;">
+                    <a href="index.html?login=true" class="cart-btn" style="text-decoration: none; display: flex; align-items: center; background-color: #849D67; color: white;">
                         Login / Register
                     </a>
                     <!-- Logout button is not needed for guest -->
@@ -80,9 +80,26 @@
 
         <!-- MAIN CONTENT (Guest Interface) -->
         <div id="main-content">
+            <!-- Prominent Account Creation Prompt -->
+            <div class="account-prompt-banner" id="account-prompt-banner">
+                <div class="account-prompt-content">
+                    <div class="account-prompt-text">
+                        <span class="prompt-icon">🎁</span>
+                        <div>
+                            <strong>Create a Customer Account & Save 15%!</strong>
+                            <p>Sign up now to unlock exclusive discounts on all fresh fruits. New customers get 15% off every order!</p>
+                        </div>
+                    </div>
+                    <a href="index.html?login=true" class="btn-primary" style="white-space: nowrap; text-decoration: none;">
+                        Create Account →
+                    </a>
+                    <button class="prompt-close" onclick="closeAccountPrompt()" aria-label="Close">×</button>
+                </div>
+            </div>
+            
             <div class="seasonal-banner">
                 <p id="seasonal-banner-text">
-                    Welcome to Agricart! Please <a href="index.html" style="color: #849D67; font-weight: bold;">Login or Register</a> to unlock special business and customer discounts.
+                    Welcome, Guest! Browse our fresh products below.
                 </p>
             </div>
             <section class="hero">
@@ -190,7 +207,25 @@
 
     <script src="app.js"></script>
     <script>
+        // Close account prompt function
+        function closeAccountPrompt() {
+            const promptBanner = document.getElementById('account-prompt-banner');
+            if (promptBanner) {
+                promptBanner.style.display = 'none';
+                // Store preference to hide prompt for this session
+                sessionStorage.setItem('hideAccountPrompt', 'true');
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', () => {
+            // Check if user wants to hide the prompt (from session storage)
+            if (sessionStorage.getItem('hideAccountPrompt') === 'true') {
+                const promptBanner = document.getElementById('account-prompt-banner');
+                if (promptBanner) {
+                    promptBanner.style.display = 'none';
+                }
+            }
+            
             // Check if a user is logged in, if so, redirect to their page
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
             if (currentUser) {

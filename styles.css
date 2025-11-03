@@ -816,6 +816,100 @@ footer {
     font-weight: 500;
 }
 
+/* Account Prompt Banner */
+.account-prompt-banner {
+    background: linear-gradient(135deg, #ff9800 0%, #ff6b00 50%, #ff9800 100%);
+    background-size: 200% 100%;
+    color: white;
+    padding: 1.5rem 1rem;
+    position: relative;
+    z-index: 25;
+    animation: pulseBg 3s infinite ease-in-out, slideDown 0.6s ease;
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.account-prompt-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.account-prompt-text {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 250px;
+}
+
+.prompt-icon {
+    font-size: 2.5rem;
+    animation: bounce 2s infinite ease-in-out;
+    flex-shrink: 0;
+}
+
+.account-prompt-text strong {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 800;
+    display: block;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.account-prompt-text p {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    margin: 0;
+    opacity: 0.95;
+    line-height: 1.4;
+}
+
+.account-prompt-banner .btn-primary {
+    background: white;
+    color: #ff9800;
+    padding: 0.875rem 2rem;
+    font-weight: 700;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 2px solid white;
+    white-space: nowrap;
+}
+
+.account-prompt-banner .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    color: #ff6b00;
+}
+
+.prompt-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.prompt-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: white;
+    transform: rotate(90deg) scale(1.1);
+}
+
 /* Seasonal Banner */
 .seasonal-banner {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 50%, var(--primary-color) 100%);
@@ -1253,6 +1347,27 @@ footer {
         left: 10px;
         bottom: 10px;
         max-width: none;
+    }
+
+    .account-prompt-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .account-prompt-text {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .account-prompt-banner .btn-primary {
+        width: 100%;
+    }
+
+    .prompt-close {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
     }
 }
 

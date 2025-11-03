@@ -372,14 +372,11 @@ function initializePage(expectedRole) {
                 return;
             }
             // If no user is logged in, proceed with guest initialization
-            // Update guest banner
+            // Update guest banner (simpler message since we have prominent prompt above)
             const banner = document.getElementById('seasonal-banner-text');
             if (banner) {
                 banner.innerHTML = `
-                    Welcome, Guest! 
-                    Browse our fresh products. 
-                    <strong><a href="index.html" style="color: #fff; text-decoration: underline;">Login or Register</a></strong> 
-                    to get special discounts!
+                    Welcome, Guest! Browse our fresh products below.
                 `;
             }
         } else {
