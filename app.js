@@ -173,6 +173,124 @@ function browseAsGuest() {
 }
 
 /**
+ * Decodes a JWT token (frontend-only, no signature verification)
+ * @param {string} token - The JWT token to decode
+ * @returns {object|null} - The decoded payload or null if invalid
+ */
+function decodeJWT(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error('Error decoding JWT:', error);
+        return null;
+    }
+}
+
+/**
+ * Handles Google Sign-In credential response
+ * @param {string} credential - The JWT credential from Google
+ */
+async function handleGoogleCredential(credential) {
+    try {
+        // Decode the JWT token to get user info
+        const payload = decodeJWT(credential);
+        
+        if (!payload) {
+            showToast("Error processing Google Sign-In. Please try again.", "error");
+            return;
+        }
+
+        // Extract user information from the credential
+        const email = payload.email;
+        const name = payload.name || payload.given_name || 'User';
+        const picture = payload.picture || '';
+        const emailVerified = payload.email_verified || false;
+
+        // Log user info to console as requested
+        console.log('Google Sign-In User Info:');
+        console.log('Name:', name);
+        console.log('Email:', email);
+        console.log('Picture:', picture);
+        console.log('Email Verified:', emailVerified);
+
+        if (!email) {
+            showToast("Unable to retrieve email from Google account. Please try again.", "error");
+            return;
+        }
+
+        // Check if user exists by email (Google users will have email as identifier)
+        const users = await fetchUsers();
+        // First check for exact email match (Google users), then check if username matches email
+        const existingUser = users.find(u => u.email === email) || users.find(u => u.username === email);
+
+        if (existingUser) {
+            // User exists, log them in
+            const userData = {
+                username: existingUser.username || email.split('@')[0],
+                email: email,
+                name: name,
+                picture: picture,
+                role: existingUser.role,
+                authMethod: 'google'
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            showToast(`Welcome back, ${name}! Redirecting to your ${existingUser.role} portal...`);
+            
+            // Redirect based on role
+            if (existingUser.role === 'business') {
+                window.location.href = 'business.html';
+            } else {
+                window.location.href = 'customer.html';
+            }
+        } else {
+            // New user - create account
+            // Default to customer role for Google sign-ups (can be changed later)
+            const username = email.split('@')[0];
+            const newUser = {
+                username: username,
+                email: email,
+                password: null, // No password for Google users
+                role: 'customer', // Default to customer
+                name: name,
+                picture: picture,
+                authMethod: 'google'
+            };
+
+            USERS.push(newUser);
+            saveUsers();
+
+            // Auto-login the new user
+            const userData = {
+                username: username,
+                email: email,
+                name: name,
+                picture: picture,
+                role: 'customer',
+                authMethod: 'google'
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            showToast(`Account created successfully! Welcome, ${name}!`);
+            
+            // Redirect to customer portal
+            window.location.href = 'customer.html';
+        }
+    } catch (error) {
+        console.error('Google Sign-In error:', error);
+        showToast("An error occurred during Google Sign-In. Please try again.", "error");
+    }
+}
+
+// Expose Google credential handler globally
+window.handleGoogleCredential = handleGoogleCredential;
+
+/**
  * Toggles between login and register forms
  */
 function toggleAuthForm() {
@@ -282,11 +400,17 @@ function initializePage(expectedRole) {
             // Update welcome banner for logged-in users
             const discountRate = (DISCOUNT_RATES[currentUser.role] * 100).toFixed(0);
             const roleDisplay = currentUser.role === 'business' ? 'Business-to-Business (B2B)' : 'Customer';
+            const displayName = currentUser.name || currentUser.username;
+            const userPicture = currentUser.picture || '';
             
             const banner = document.getElementById('seasonal-banner-text');
             if (banner) {
+                let pictureHtml = '';
+                if (userPicture) {
+                    pictureHtml = `<img src="${userPicture}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; vertical-align: middle; margin-right: 8px; border: 2px solid #fff;">`;
+                }
                 banner.innerHTML = `
-                    Welcome, ${currentUser.username}! 
+                    ${pictureHtml}Welcome, ${displayName}! 
                     You are a <strong>${roleDisplay}</strong> account. 
                     You receive a special <strong>${discountRate}%</strong> discount on all orders.
                 `;
@@ -362,7 +486,8 @@ function updateLogoutButton() {
         }
 
         if (currentUser) {
-            logoutBtn.innerHTML = `🚪 Logout (${currentUser.username})`;
+            const displayName = currentUser.name || currentUser.username;
+            logoutBtn.innerHTML = `🚪 Logout (${displayName})`;
             logoutBtn.onclick = logout;
             logoutBtn.style.display = 'inline-flex';
         } else {

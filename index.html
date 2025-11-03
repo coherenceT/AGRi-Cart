@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agricart - Account Login</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -90,6 +91,12 @@
                     <button type="submit" class="btn-primary">Login</button>
                 </form>
                 
+                <!-- Google Sign-In Button -->
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #ddd; text-align: center;">
+                    <div style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Or</div>
+                    <div id="google-signin-button" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+                </div>
+                
                 <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd; text-align: center;">
                     <h3>New User?</h3>
                     <p style="margin-bottom: 1rem; color: var(--text-dark);">
@@ -141,6 +148,12 @@
                 </div>
                 <button type="submit" class="btn-primary" style="width: 100%;">Register</button>
             </form>
+            
+            <!-- Google Sign-In Button in Register Modal -->
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #ddd; text-align: center;">
+                <div style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Or sign up with</div>
+                <div id="google-signin-button-modal" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+            </div>
         </div>
     </div>
 
@@ -190,6 +203,59 @@
             
             await register(username, password, role);
         });
+        
+        // Google Sign-In callback handler
+        window.handleGoogleSignIn = function(response) {
+            if (response.credential) {
+                handleGoogleCredential(response.credential);
+            }
+        };
+        
+        // Initialize Google Sign-In when Google SDK is loaded
+        function initGoogleSignIn() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: '185040074151-8p7aek0739b8om6j6hsjt5tssgr96b4b.apps.googleusercontent.com',
+                    callback: handleGoogleSignIn
+                });
+                
+                // Render the Google Sign-In button in the login form
+                const loginButtonContainer = document.getElementById('google-signin-button');
+                if (loginButtonContainer) {
+                    google.accounts.id.renderButton(loginButtonContainer, {
+                        theme: 'outline',
+                        size: 'large',
+                        text: 'sign_in_with',
+                        shape: 'rectangular',
+                        logo_alignment: 'left',
+                        width: '100%'
+                    });
+                }
+                
+                // Render the Google Sign-In button in the register modal
+                const modalButtonContainer = document.getElementById('google-signin-button-modal');
+                if (modalButtonContainer) {
+                    google.accounts.id.renderButton(modalButtonContainer, {
+                        theme: 'outline',
+                        size: 'large',
+                        text: 'sign_in_with',
+                        shape: 'rectangular',
+                        logo_alignment: 'left',
+                        width: '100%'
+                    });
+                }
+            } else {
+                // Retry after a short delay if Google SDK hasn't loaded yet
+                setTimeout(initGoogleSignIn, 100);
+            }
+        }
+        
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGoogleSignIn);
+        } else {
+            initGoogleSignIn();
+        }
     </script>
 </body>
 </html>
