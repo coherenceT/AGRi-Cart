@@ -8,23 +8,23 @@ const DISCOUNT_RATES = {
     'guest': 0.00
 };
 
-// Initial product data (extracted from original index.html)
+// Initial product data
 PRODUCTS = [
-    { id: 1, name: 'Bananas', emoji: 'images/bananas.jpg', tiers: { good: 45, better: 55, best: 65, premium: 85 } },
-    { id: 2, name: 'Apples', emoji: 'images/apples.jpg', tiers: { good: 60, better: 75, best: 90, premium: 120 } },
-    { id: 3, name: 'Oranges', emoji: 'images/oranges.jpg', tiers: { good: 50, better: 65, best: 80, premium: 110 } },
-    { id: 4, name: 'Mangoes', emoji: 'images/mangoes.jpg', tiers: { good: 70, better: 90, best: 110, premium: 150 } },
-    { id: 5, name: 'Pears', emoji: 'images/pear.jpg', tiers: { good: 55, better: 70, best: 85, premium: 115 } },
-    { id: 6, name: 'Grapes', emoji: 'images/grapes.jpg', tiers: { good: 65, better: 80, best: 100, premium: 140 } },
-    { id: 7, name: 'Pineapples', emoji: 'images/pinaples.jpg', tiers: { good: 80, better: 100, best: 120, premium: 160 } },
-    { id: 8, name: 'Avocados', emoji: 'images/avocados.jpg', tiers: { good: 75, better: 95, best: 115, premium: 155 } },
-    { id: 9, name: 'Strawberries', emoji: 'images/strawberies.jpg', tiers: { good: 85, better: 105, best: 125, premium: 165 } },
-    { id: 10, name: 'Blueberries', emoji: 'images/bleuberries.jpg', tiers: { good: 95, better: 115, best: 135, premium: 175 } },
-    { id: 11, name: 'Kiwis', emoji: 'images/kiwi.jpg', tiers: { good: 70, better: 85, best: 100, premium: 130 } },
-    { id: 12, name: 'Watermelons', emoji: 'images/watermelon.jpg', tiers: { good: 120, better: 150, best: 180, premium: 230 } },
-    { id: 13, name: 'Papayas', emoji: 'images/papayas.jpg', tiers: { good: 60, better: 75, best: 90, premium: 120 } },
-    { id: 14, name: 'Lemons', emoji: 'images/lemon.jpg', tiers: { good: 40, better: 50, best: 60, premium: 80 } },
-    { id: 15, name: 'Limes', emoji: 'images/lime.jpg', tiers: { good: 40, better: 50, best: 60, premium: 80 } }
+    { id: 1, name: 'Bananas', emoji: 'images/bananas.jpg', sizes: { xs: 45, s: 55, m: 65, l: 85, xl: 105 } },
+    { id: 2, name: 'Apples', emoji: 'images/apples.jpg', sizes: { xs: 60, s: 75, m: 90, l: 120, xl: 150 } },
+    { id: 3, name: 'Oranges', emoji: 'images/oranges.jpg', sizes: { xs: 50, s: 65, m: 80, l: 110, xl: 140 } },
+    { id: 4, name: 'Mangoes', emoji: 'images/mangoes.jpg', sizes: { xs: 70, s: 90, m: 110, l: 150, xl: 190 } },
+    { id: 5, name: 'Pears', emoji: 'images/pear.jpg', sizes: { xs: 55, s: 70, m: 85, l: 115, xl: 145 } },
+    { id: 6, name: 'Grapes', emoji: 'images/grapes.jpg', sizes: { xs: 65, s: 80, m: 100, l: 140, xl: 180 } },
+    { id: 7, name: 'Pineapples', emoji: 'images/pinaples.jpg', sizes: { xs: 80, s: 100, m: 120, l: 160, xl: 200 } },
+    { id: 8, name: 'Avocados', emoji: 'images/avocados.jpg', sizes: { xs: 75, s: 95, m: 115, l: 155, xl: 195 } },
+    { id: 9, name: 'Strawberries', emoji: 'images/strawberies.jpg', sizes: { xs: 85, s: 105, m: 125, l: 165, xl: 205 } },
+    { id: 10, name: 'Blueberries', emoji: 'images/bleuberries.jpg', sizes: { xs: 95, s: 115, m: 135, l: 175, xl: 215 } },
+    { id: 11, name: 'Kiwis', emoji: 'images/kiwi.jpg', sizes: { xs: 70, s: 85, m: 100, l: 130, xl: 160 } },
+    { id: 12, name: 'Watermelons', emoji: 'images/watermelon.jpg', sizes: { xs: 120, s: 150, m: 180, l: 230, xl: 280 } },
+    { id: 13, name: 'Papayas', emoji: 'images/papayas.jpg', sizes: { xs: 60, s: 75, m: 90, l: 120, xl: 150 } },
+    { id: 14, name: 'Lemons', emoji: 'images/lemon.jpg', sizes: { xs: 40, s: 50, m: 60, l: 80, xl: 100 } },
+    { id: 15, name: 'Limes', emoji: 'images/lime.jpg', sizes: { xs: 40, s: 50, m: 60, l: 80, xl: 100 } }
 ];
 
 // --- User Management ---
@@ -61,12 +61,19 @@ async function fetchUsers() {
  * @param {string} username 
  * @param {string} password 
  * @param {string} role - 'business' or 'customer'
+ * @param {string} businessType - 'self' or 'business' (only for business role)
  */
-async function register(username, password, role) {
+async function register(username, password, role, businessType = null) {
     try {
         // Validate inputs
         if (!username || !password || !role) {
             showToast("Please fill in all fields.", "error");
+            return false;
+        }
+
+        // Validate business type if role is business
+        if (role === 'business' && !businessType) {
+            showToast("Please specify if this account is for yourself or your business.", "error");
             return false;
         }
 
@@ -96,13 +103,33 @@ async function register(username, password, role) {
             role: role
         };
 
+        // Add business type information if it's a business account
+        if (role === 'business' && businessType) {
+            newUser.businessType = businessType;
+            newUser.businessTypeDisplay = businessType === 'self' ? 'Personal Business Use' : 'Business/Company';
+        }
+
         USERS.push(newUser);
         saveUsers();
 
-        showToast(`Account created successfully! Welcome, ${username}!`);
+        // Show success message with business type info if applicable
+        let successMessage = `Account created successfully! Welcome, ${username}!`;
+        if (role === 'business') {
+            successMessage += ` You have a ${businessType === 'self' ? 'Personal Business' : 'Business/Company'} account.`;
+        }
+        showToast(successMessage);
         
         // Auto-login after registration
-        localStorage.setItem('currentUser', JSON.stringify({ username: username, role: role }));
+        const userData = {
+            username: username,
+            role: role
+        };
+        
+        if (role === 'business' && businessType) {
+            userData.businessType = businessType;
+        }
+        
+        localStorage.setItem('currentUser', JSON.stringify(userData));
         
         // Redirect based on role
         if (role === 'business') {
@@ -331,12 +358,10 @@ window.createFloatingLeaves = createFloatingLeaves;
 window.updateProgressBar = updateProgressBar;
 window.renderProducts = renderProducts;
 window.openProductModal = openProductModal;
-window.selectTier = selectTier;
-window.updateTierQuantityControls = updateTierQuantityControls;
-window.increaseTierQty = increaseTierQty;
-window.decreaseTierQty = decreaseTierQty;
-window.updateTierQty = updateTierQty;
+window.selectSize = selectSize;
 window.updateTotalPrice = updateTotalPrice;
+window.increaseQuantity = increaseQuantity;
+window.decreaseQuantity = decreaseQuantity;
 window.addToCart = addToCart;
 window.openCart = openCart;
 window.closeCart = closeCart;
@@ -396,7 +421,14 @@ function initializePage(expectedRole) {
             
             // Update welcome banner for logged-in users
             const discountRate = (DISCOUNT_RATES[currentUser.role] * 100).toFixed(0);
-            const roleDisplay = currentUser.role === 'business' ? 'Business-to-Business (B2B)' : 'Customer';
+            let roleDisplay = currentUser.role === 'business' ? 'Business-to-Business (B2B)' : 'Customer';
+            
+            // Add business type info if available
+            if (currentUser.role === 'business' && currentUser.businessType) {
+                const businessTypeText = currentUser.businessType === 'self' ? 'Personal Business' : 'Company/Business';
+                roleDisplay = `Business Account (${businessTypeText})`;
+            }
+            
             const displayName = currentUser.name || currentUser.username;
             const userPicture = currentUser.picture || '';
             
@@ -541,7 +573,7 @@ function renderProducts() {
                 </div>
                 <div class="product-info">
                     <div class="product-name">${product.name}</div>
-                    <div class="product-description">4 quality options available</div>
+                    <div class="product-description">5 size options available</div>
                     <button class="btn-secondary" onclick="openProductModal(${product.id})">
                         View options
                     </button>
@@ -576,26 +608,42 @@ function openProductModal(productId) {
             <div style="text-align: center; height: 200px; margin-bottom: 1rem; overflow: hidden; border-radius: 8px;">
                 <img src="${product.emoji}" alt="${product.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZWVlIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj4kTm8gSW1hZ2U8L3RleHQ+PC9zdmc+'">
             </div>
-            <div class="tier-options">
-                <div class="tier-option" onclick="selectTier(this, 'good', ${product.tiers.good})">
-                    <div class="tier-name">Good</div>
-                    <div class="tier-price">R${product.tiers.good}</div>
+            <div class="size-selection-container">
+                <div class="size-grid">
+                    <div class="size-card selected" onclick="selectSize(this, 'xs', ${product.sizes.xs})">
+                        <div class="size-badge">XS</div>
+                        <div class="size-price">R${product.sizes.xs}</div>
+                        <div class="size-info">2 pieces</div>
+                    </div>
+                    <div class="size-card" onclick="selectSize(this, 's', ${product.sizes.s})">
+                        <div class="size-badge">S</div>
+                        <div class="size-price">R${product.sizes.s}</div>
+                        <div class="size-info">4 pieces</div>
+                    </div>
+                    <div class="size-card" onclick="selectSize(this, 'm', ${product.sizes.m})">
+                        <div class="size-badge">M</div>
+                        <div class="size-price">R${product.sizes.m}</div>
+                        <div class="size-info">8 pieces</div>
+                    </div>
+                    <div class="size-card" onclick="selectSize(this, 'l', ${product.sizes.l})">
+                        <div class="size-badge">L</div>
+                        <div class="size-price">R${product.sizes.l}</div>
+                        <div class="size-info">12 pieces</div>
+                    </div>
+                    <div class="size-card" onclick="selectSize(this, 'xl', ${product.sizes.xl || product.sizes.l + 40})">
+                        <div class="size-badge">XL</div>
+                        <div class="size-price">R${product.sizes.xl || product.sizes.l + 40}</div>
+                        <div class="size-info">16 pieces</div>
+                    </div>
                 </div>
-                <div class="tier-option" onclick="selectTier(this, 'better', ${product.tiers.better})">
-                    <div class="tier-name">Better</div>
-                    <div class="tier-price">R${product.tiers.better}</div>
+                <div class="quantity-controls">
+                    <label class="quantity-label">Quantity:</label>
+                    <div class="quantity-selector">
+                        <button class="qty-btn" onclick="decreaseQuantity()">-</button>
+                        <input type="number" id="quantity-input" class="quantity-input" value="1" min="1" max="99">
+                        <button class="qty-btn" onclick="increaseQuantity()">+</button>
+                    </div>
                 </div>
-                <div class="tier-option" onclick="selectTier(this, 'best', ${product.tiers.best})">
-                    <div class="tier-name">Best</div>
-                    <div class="tier-price">R${product.tiers.best}</div>
-                </div>
-                <div class="tier-option" onclick="selectTier(this, 'premium', ${product.tiers.premium})">
-                    <div class="tier-name">Premium</div>
-                    <div class="tier-price">R${product.tiers.premium}</div>
-                </div>
-            </div>
-            <div class="tier-quantity-controls" id="tier-quantity-controls">
-                <!-- Tier quantity controls will be added here -->
             </div>
             <div class="price-display" id="total-price">Total: R0.00</div>
             <button class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;" onclick="addToCart(${productId})">
@@ -605,124 +653,68 @@ function openProductModal(productId) {
 
         modal.classList.add('active');
         window.currentProduct = product;
-        window.selectedTiers = {};
-        window.selectedTier = null;
+        window.selectedSize = null;
         window.selectedPrice = 0;
-        
-        // Initialize tier quantity controls
-        updateTierQuantityControls();
+        window.quantity = 1;
+
+        // Initialize quantity controls
+        updateTotalPrice();
     } catch (error) {
         console.error('Error opening product modal:', error);
         showToast('Error opening product details.', 'error');
     }
 }
 
-function selectTier(element, tier, price) {
+function selectSize(element, size, price) {
     try {
-        document.querySelectorAll('.tier-option').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.size-card').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
-        window.selectedTier = tier;
+        window.selectedSize = size;
         window.selectedPrice = price;
-        
-        // Initialize this tier in selectedTiers if not present
-        if (!window.selectedTiers[tier]) {
-            window.selectedTiers[tier] = 0;
-        }
-        
-        updateTierQuantityControls();
         updateTotalPrice();
     } catch (error) {
-        console.error('Error selecting tier:', error);
-    }
-}
-
-function updateTierQuantityControls() {
-    const container = document.getElementById('tier-quantity-controls');
-    const product = window.currentProduct;
-    
-    if (!product || !container) return;
-    
-    try {
-        let html = '';
-        
-        // Create quantity controls for each tier
-        Object.entries(product.tiers).forEach(([tier, price]) => {
-            const quantity = window.selectedTiers[tier] || 0;
-            const isSelected = window.selectedTier === tier;
-            
-            html += `
-                <div class="tier-quantity-row" ${isSelected ? 'style="background-color: rgba(132, 157, 103, 0.05); border-radius: 8px; padding: 0.75rem;"' : ''}>
-                    <div class="tier-quantity-info">
-                        <div class="tier-quantity-name">${tier.charAt(0).toUpperCase() + tier.slice(1)}</div>
-                        <div class="tier-quantity-price">R${price} per item</div>
-                    </div>
-                    <div class="tier-quantity-selector">
-                        <button type="button" class="quantity-btn" onclick="decreaseTierQty('${tier}')">−</button>
-                        <input type="number" id="quantity-${tier}" value="${quantity}" min="0" class="quantity-input" onchange="updateTierQty('${tier}', this.value)">
-                        <button type="button" class="quantity-btn" onclick="increaseTierQty('${tier}')">+</button>
-                    </div>
-                </div>
-            `;
-        });
-        
-        container.innerHTML = html;
-    } catch (error) {
-        console.error('Error updating tier quantity controls:', error);
-    }
-}
-
-function increaseTierQty(tier) {
-    try {
-        const input = document.getElementById(`quantity-${tier}`);
-        if (!input) return;
-        input.value = parseInt(input.value) + 1;
-        updateTierQty(tier, input.value);
-    } catch (error) {
-        console.error('Error increasing tier quantity:', error);
-    }
-}
-
-function decreaseTierQty(tier) {
-    try {
-        const input = document.getElementById(`quantity-${tier}`);
-        if (!input) return;
-        if (parseInt(input.value) > 0) {
-            input.value = parseInt(input.value) - 1;
-            updateTierQty(tier, input.value);
-        }
-    } catch (error) {
-        console.error('Error decreasing tier quantity:', error);
-    }
-}
-
-function updateTierQty(tier, value) {
-    try {
-        window.selectedTiers[tier] = parseInt(value) || 0;
-        updateTotalPrice();
-    } catch (error) {
-        console.error('Error updating tier quantity:', error);
+        console.error('Error selecting size:', error);
     }
 }
 
 function updateTotalPrice() {
     try {
         const product = window.currentProduct;
-        if (!product) return;
-        
-        let total = 0;
-        
-        Object.entries(window.selectedTiers).forEach(([tier, quantity]) => {
-            if (quantity > 0 && product.tiers[tier]) {
-                total += product.tiers[tier] * quantity;
-            }
-        });
-        
+        if (!product || !window.selectedSize) return;
+
+        const total = window.selectedPrice * window.quantity;
         const totalPriceElement = document.getElementById('total-price');
         if (totalPriceElement) {
             totalPriceElement.textContent = `Total: R${total.toFixed(2)}`;
         }
     } catch (error) {
         console.error('Error updating total price:', error);
+    }
+}
+
+function increaseQuantity() {
+    try {
+        const input = document.getElementById('quantity-input');
+        if (input) {
+            input.stepUp();
+            window.quantity = parseInt(input.value);
+            updateTotalPrice();
+        }
+    } catch (error) {
+        console.error('Error increasing quantity:', error);
+    }
+}
+
+function decreaseQuantity() {
+    try {
+        const input = document.getElementById('quantity-input');
+        if (input && input.value > 1) {
+            input.stepDown();
+            window.quantity = parseInt(input.value);
+            updateTotalPrice();
+        }
+    } catch (error) {
+        console.error('Error decreasing quantity:', error);
     }
 }
 
@@ -734,29 +726,17 @@ function addToCart(productId) {
             return;
         }
 
-        let hasItems = false;
-        
-        // Check if any tier has quantity > 0
-        Object.values(window.selectedTiers).forEach(quantity => {
-            if (quantity > 0) hasItems = true;
-        });
-        
-        if (!hasItems) {
-            showToast('Please select at least one quality tier with quantity greater than 0', 'error');
+        if (!window.selectedSize) {
+            showToast('Please select a size', 'error');
             return;
         }
 
-        // Add each tier with quantity > 0 to cart
-        Object.entries(window.selectedTiers).forEach(([tier, quantity]) => {
-            if (quantity > 0) {
-                cart.push({
-                    productName: product.name,
-                    tier: tier,
-                    price: product.tiers[tier],
-                    quantity: quantity,
-                    total: product.tiers[tier] * quantity
-                });
-            }
+        cart.push({
+            productName: product.name,
+            size: window.selectedSize,
+            price: window.selectedPrice,
+            quantity: window.quantity,
+            total: window.selectedPrice * window.quantity
         });
 
         localStorage.setItem('agricart-cart', JSON.stringify(cart));
@@ -785,7 +765,7 @@ function openCart() {
             cartItems.innerHTML = cart.map((item, index) => `
                 <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <div style="font-weight: 600;">${item.productName} (${item.tier})</div>
+                        <div style="font-weight: 600;">${item.productName} (${item.size.toUpperCase()})</div>
                         <div style="color: #666; font-size: 0.875rem;">R${item.price.toFixed(2)} × ${item.quantity}</div>
                     </div>
                     <div style="text-align: right;">
@@ -879,9 +859,9 @@ function submitOrder(event) {
 
         const totals = calculateDiscountedTotal(cart);
         
-        const orderDetails = cart.map(item => 
-            `${item.productName} (${item.tier}) - R${item.price.toFixed(2)} × ${item.quantity} = R${item.total.toFixed(2)}`
-        ).join('\n');
+const orderDetails = cart.map(item =>
+    `${item.productName} (${item.size.toUpperCase()}) - R${item.price.toFixed(2)} × ${item.quantity} = R${item.total.toFixed(2)}`
+).join('\n');
 
         const message = `Hi Agricart! I'd like to place an order:\n\n*Order Details:*\n${orderDetails}\n\n*Subtotal: R${totals.subtotal.toFixed(2)}*\n*Discount (${(totals.discountRate * 100).toFixed(0)}%): -R${totals.discountAmount.toFixed(2)}*\n*Final Total: R${totals.finalTotal.toFixed(2)}*\n\n*Customer Details:*\nName: ${nameValue}\nPhone: ${phoneValue}\nAddress: ${addressValue}\nDelivery Date: ${dateValue}`;
 

@@ -155,10 +155,21 @@
                 </div>
                 <div class="form-group">
                     <label for="reg-role">Account Type</label>
-                    <select id="reg-role" required>
+                    <select id="reg-role" required onchange="toggleBusinessType()">
                         <option value="customer">Customer (15% Discount)</option>
                         <option value="business">Business (20% Discount)</option>
                     </select>
+                </div>
+                <div class="form-group" id="business-type-group" style="display: none;">
+                    <label for="reg-business-type">Is this Business account for:</label>
+                    <select id="reg-business-type" required>
+                        <option value="">Select an option...</option>
+                        <option value="self">Self (Personal Business Use)</option>
+                        <option value="business">My Business/Company</option>
+                    </select>
+                    <small style="display: block; margin-top: 0.5rem; color: var(--text-light); font-size: 0.875rem; line-height: 1.4;">
+                        📋 Please clarify: Is this account for your personal business use, or for your company/business?
+                    </small>
                 </div>
                 <button type="submit" class="btn-primary" style="width: 100%;">Register</button>
             </form>
@@ -220,7 +231,49 @@
 
         function closeCreateAccountModal() {
             document.getElementById('create-account-modal').classList.remove('active');
+            // Reset form when closing
+            document.getElementById('register-form').reset();
+            document.getElementById('business-type-group').style.display = 'none';
         }
+        
+        // Toggle business type field based on role selection
+        function toggleBusinessType() {
+            const role = document.getElementById('reg-role').value;
+            const businessTypeGroup = document.getElementById('business-type-group');
+            const businessTypeSelect = document.getElementById('reg-business-type');
+            if (role === 'business') {
+                businessTypeGroup.style.display = 'block';
+                businessTypeSelect.required = true;
+                // Add animation
+                businessTypeGroup.style.animation = 'fadeInUp 0.3s ease';
+            } else {
+                businessTypeGroup.style.display = 'none';
+                businessTypeSelect.required = false;
+                businessTypeSelect.value = ''; // Reset value when hiding
+            }
+        }
+        
+        // Expose function globally
+        window.toggleBusinessType = toggleBusinessType;
+        
+        // Check URL parameters and pre-select role if coming from prompt
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roleParam = urlParams.get('role');
+            
+            if (roleParam === 'customer' || roleParam === 'business') {
+                // Auto-open modal and set role
+                setTimeout(() => {
+                    const modal = document.getElementById('create-account-modal');
+                    const roleSelect = document.getElementById('reg-role');
+                    modal.classList.add('active');
+                    roleSelect.value = roleParam;
+                    toggleBusinessType();
+                    // Focus on username field for better UX
+                    document.getElementById('reg-username').focus();
+                }, 300);
+            }
+        });
         
         // Attach registration handler
         document.getElementById('register-form').addEventListener('submit', async (e) => {
@@ -228,8 +281,9 @@
             const username = document.getElementById('reg-username').value;
             const password = document.getElementById('reg-password').value;
             const role = document.getElementById('reg-role').value;
+            const businessType = document.getElementById('reg-business-type').value;
             
-            await register(username, password, role);
+            await register(username, password, role, businessType);
         });
         
         // Google Sign-In callback handler

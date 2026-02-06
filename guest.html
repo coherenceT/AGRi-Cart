@@ -86,13 +86,18 @@
                     <div class="account-prompt-text">
                         <span class="prompt-icon">🎁</span>
                         <div>
-                            <strong>Create a Customer Account & Save 15%!</strong>
-                            <p>Sign up now to unlock exclusive discounts on all fresh fruits. New customers get 15% off every order!</p>
+                            <strong>Create an Account & Save Up to 20%!</strong>
+                            <p>Sign up now to unlock exclusive discounts! <strong>Customers get 15% off</strong>, <strong>Business accounts get 20% off</strong> on all fresh fruit orders.</p>
                         </div>
                     </div>
-                    <a href="index.html?login=true" class="btn-primary" style="white-space: nowrap; text-decoration: none;">
-                        Create Account →
-                    </a>
+                    <div class="prompt-buttons">
+                        <a href="index.html?login=true&role=customer" class="btn-primary btn-customer" style="white-space: nowrap; text-decoration: none;">
+                            Customer (15%)
+                        </a>
+                        <a href="index.html?login=true&role=business" class="btn-primary btn-business" style="white-space: nowrap; text-decoration: none;">
+                            Business (20%)
+                        </a>
+                    </div>
                     <button class="prompt-close" onclick="closeAccountPrompt()" aria-label="Close">×</button>
                 </div>
             </div>
